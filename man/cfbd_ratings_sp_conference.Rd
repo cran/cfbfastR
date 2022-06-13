@@ -9,8 +9,8 @@ cfbd_ratings_sp_conference(year = NULL, conference = NULL)
 \arguments{
 \item{year}{(\emph{Integer} optional): Year, 4 digit format (\emph{YYYY})}
 
-\item{conference}{(\emph{String} optional): Conference abbreviation - S&P+ information by conference\cr
-Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
+\item{conference}{(\emph{String} optional): Conference abbreviation - S&P+ information by conference
+Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
 Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC}
 }
 \value{
@@ -49,11 +49,11 @@ Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC}
 }
 \examples{
 \donttest{
-cfbd_ratings_sp_conference(year = 2019)
+  try(cfbd_ratings_sp_conference(year = 2019))
 
-cfbd_ratings_sp_conference(year = 2012, conference = "SEC")
+  try(cfbd_ratings_sp_conference(year = 2012, conference = "SEC"))
 
-cfbd_ratings_sp_conference(year = 2016, conference = "ACC")
+  try(cfbd_ratings_sp_conference(year = 2016, conference = "ACC"))
 }
 
 }

@@ -59,10 +59,10 @@
 NULL
 #' @title
 #' **Team info lookup**
-#' @param conference (*String* optional): Conference abbreviation - Select a valid FBS conference\cr
-#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC,\cr
-#' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC\cr
-#' @param only_fbs (*Logical* default TRUE): Filter for only returning FBS teams for a given year.\cr
+#' @param conference (*String* optional): Conference abbreviation - Select a valid FBS conference
+#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC,
+#' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC
+#' @param only_fbs (*Logical* default TRUE): Filter for only returning FBS teams for a given year.
 #' If year is left blank while only_fbs is TRUE, then will return values for most current year
 #' @param year (*Integer* optional): Year, 4 digit format (*YYYY*). Filter for getting a list of major division team for a given year
 #' @return [cfbd_team_info()] - A data frame with 12 variables:
@@ -103,11 +103,11 @@ NULL
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_team_info(conference = "SEC")
+#'   try(cfbd_team_info(conference = "SEC"))
 #'
-#' cfbd_team_info(conference = "Ind")
+#'   try(cfbd_team_info(conference = "Ind"))
 #'
-#' cfbd_team_info(year = 2019)
+#'   try(cfbd_team_info(year = 2019))
 #' }
 cfbd_team_info <- function(conference = NULL, only_fbs = TRUE, year = NULL) {
   if (!is.null(conference)) {
@@ -117,52 +117,13 @@ cfbd_team_info <- function(conference = NULL, only_fbs = TRUE, year = NULL) {
 
 
 
-  base_url <- "https://api.collegefootballdata.com/teams?"
+    base_url <- "https://api.collegefootballdata.com/teams?"
 
-  full_url <- paste0(
-    base_url,
-    "conference=", conference
-  )
+    full_url <- paste0(
+      base_url,
+      "conference=", conference
+    )
 
-  # Check for CFBD API key
-  if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
-
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
-  # Get the content and return it as data.frame
-  df <- res %>%
-    httr::content(as = "text", encoding = "UTF-8") %>%
-    jsonlite::fromJSON()
-  locs <- df$location
-  locs <- locs %>%
-    jsonlite::flatten()
-  df <- df %>% select(-.data$location)
-  # suppressWarnings(
-  #   logos_list <- df %>%
-  #     dplyr::group_by(.data$id) %>%
-  #     tidyr::separate(.data$logos, c("logo_1","logo_2"), sep = ',') %>%
-  #     dplyr::mutate(
-  #       logo_1 = stringr::str_remove(.data$logo_1, "c\\("),
-  #       logo_1 = ifelse(.data$logo_1 == 'NULL', NA_character_, .data$logo_1),
-  #       logo_2 = stringr::str_remove(.data$logo_2,"\\)"),
-  #       logo_2 = ifelse(.data$logo_2 == 'NULL', NA_character_, .data$logo_2),
-  #     )
-  #
-  # )
-  df <- dplyr::bind_cols(df, locs) %>%
-    dplyr::rename(
-      team_id = .data$id,
-      venue_name = .data$name) %>%
-    as.data.frame()
-
-    return(df)
   } else {
     if(!is.null(year) && !is.numeric(year) && nchar(year) != 4){
       cli::cli_abort("Enter valid year as a number (YYYY)")
@@ -182,48 +143,66 @@ cfbd_team_info <- function(conference = NULL, only_fbs = TRUE, year = NULL) {
       base_url,
       "?year=", year
     )
-
-    # Check for CFBD API key
-    if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
-
-    # Create the GET request and set response as res
-    res <- httr::RETRY(
-      "GET", full_url,
-      httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-    )
-
-    # Check the result
-    check_status(res)
-
-
-    # Get the content and return it as data.frame
-    df <- res %>%
-      httr::content(as = "text", encoding = "UTF-8") %>%
-      jsonlite::fromJSON()
-    locs <- df$location
-    locs <- locs %>%
-      jsonlite::flatten()
-    df <- df %>% select(-.data$location)
-    # suppressWarnings(
-    #   logos_list <- df %>%
-    #     dplyr::group_by(.data$id) %>%
-    #     tidyr::separate(.data$logos, c("logo_1","logo_2"), sep = ',') %>%
-    #     dplyr::mutate(
-    #       logo_1 = stringr::str_remove(.data$logo_1, "c\\("),
-    #       logo_1 = ifelse(.data$logo_1 == 'NULL', NA_character_, .data$logo_1),
-    #       logo_2 = stringr::str_remove(.data$logo_2,"\\)"),
-    #       logo_2 = ifelse(.data$logo_2 == 'NULL', NA_character_, .data$logo_2),
-    #     )
-    #
-    # )
-    df <- dplyr::bind_cols(df, locs) %>%
-      dplyr::rename(
-        team_id = .data$id,
-        venue_name = .data$name) %>%
-      as.data.frame()
-
-    return(df)
   }
+
+  # Check for CFBD API key
+  if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
+
+  tryCatch(
+    expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
+      # Get the content and return it as data.frame
+      df <- res %>%
+        httr::content(as = "text", encoding = "UTF-8") %>%
+        jsonlite::fromJSON()
+      locs <- df$location
+      locs <- locs %>%
+        jsonlite::flatten()
+      df <- df %>% select(-.data$location)
+      # suppressWarnings(
+      #   logos_list <- df %>%
+      #     dplyr::group_by(.data$id) %>%
+      #     tidyr::separate(.data$logos, c("logo_1","logo_2"), sep = ',') %>%
+      #     dplyr::mutate(
+      #       logo_1 = stringr::str_remove(.data$logo_1, "c\\("),
+      #       logo_1 = ifelse(.data$logo_1 == 'NULL', NA_character_, .data$logo_1),
+      #       logo_2 = stringr::str_remove(.data$logo_2,"\\)"),
+      #       logo_2 = ifelse(.data$logo_2 == 'NULL', NA_character_, .data$logo_2),
+      #     )
+      #
+      # )
+      df <- df %>%
+        tidyr::unnest_wider(.data$logos,names_sep = "_") %>%
+        dplyr::rename(logo = .data$logos_1,logo_2 = .data$logos_2)
+      df <- dplyr::bind_cols(df, locs) %>%
+        dplyr::rename(
+          team_id = .data$id,
+          venue_name = .data$name) %>%
+        as.data.frame()
+
+
+
+      df <- df %>%
+        make_cfbfastR_data("Team information from CollegeFootballData.com",Sys.time())
+    },
+    error = function(e) {
+      message(glue::glue("{Sys.time()}:Invalid arguments or no team data available!"))
+    },
+    warning = function(w) {
+    },
+    finally = {
+    }
+  )
+  return(df)
 }
 
 
@@ -256,9 +235,9 @@ cfbd_team_info <- function(conference = NULL, only_fbs = TRUE, year = NULL) {
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_team_matchup_records("Texas", "Oklahoma")
+#'   try(cfbd_team_matchup_records("Texas", "Oklahoma"))
 #'
-#' cfbd_team_matchup_records("Texas A&M", "TCU", min_year = 1975)
+#'   try(cfbd_team_matchup_records("Texas A&M", "TCU", min_year = 1975))
 #' }
 #'
 cfbd_team_matchup_records <- function(team1, team2, min_year = NULL, max_year = NULL) {
@@ -300,26 +279,27 @@ cfbd_team_matchup_records <- function(team1, team2, min_year = NULL, max_year = 
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON()
       df1 <- tibble::enframe(unlist(df, use.names = TRUE))[1:7, ]
       df <- tidyr::pivot_wider(df1,
-        names_from = .data$name,
-        values_from = .data$value
+                               names_from = .data$name,
+                               values_from = .data$value
       ) %>%
         dplyr::rename(
           start_year = .data$startYear,
@@ -334,6 +314,10 @@ cfbd_team_matchup_records <- function(team1, team2, min_year = NULL, max_year = 
           .data$ties
         )
       df <- as.data.frame(df)
+
+
+      df <- df %>%
+        make_cfbfastR_data("Team matchup record from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}:Invalid arguments or no team matchup records data available!"))
@@ -377,13 +361,13 @@ cfbd_team_matchup_records <- function(team1, team2, min_year = NULL, max_year = 
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_team_matchup("Texas", "Oklahoma")
+#'   try(cfbd_team_matchup("Texas", "Oklahoma"))
 #'
-#' cfbd_team_matchup("Texas A&M", "TCU")
+#'   try(cfbd_team_matchup("Texas A&M", "TCU"))
 #'
-#' cfbd_team_matchup("Texas A&M", "TCU", min_year = 1975)
+#'   try(cfbd_team_matchup("Texas A&M", "TCU", min_year = 1975))
 #'
-#' cfbd_team_matchup("Florida State", "Florida", min_year = 1975)
+#'   try(cfbd_team_matchup("Florida State", "Florida", min_year = 1975))
 #' }
 #'
 cfbd_team_matchup <- function(team1, team2, min_year = NULL, max_year = NULL) {
@@ -425,29 +409,35 @@ cfbd_team_matchup <- function(team1, team2, min_year = NULL, max_year = NULL) {
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
-        jsonlite::fromJSON()$games
+        jsonlite::fromJSON() %>%
+        .data$games
       if (nrow(df) == 0) {
-          warning("The data pulled from the API was empty.")
+        warning("The data pulled from the API was empty.")
         return(NULL)
       }
       df <- df %>%
         janitor::clean_names() %>%
         as.data.frame()
+
+
+      df <- df %>%
+        make_cfbfastR_data("Team matchup history from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}:Invalid arguments or no team matchup data available!"))
@@ -499,7 +489,7 @@ cfbd_team_matchup <- function(team1, team2, min_year = NULL, max_year = NULL) {
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_team_roster(year = 2013, team = "Florida State")
+#'   try(cfbd_team_roster(year = 2013, team = "Florida State"))
 #' }
 #'
 cfbd_team_roster <- function(year, team = NULL) {
@@ -535,18 +525,19 @@ cfbd_team_roster <- function(year, team = NULL) {
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
@@ -554,6 +545,10 @@ cfbd_team_roster <- function(year, team = NULL) {
         dplyr::rename(athlete_id = .data$id) %>%
         dplyr::mutate(headshot_url = paste0("https://a.espncdn.com/i/headshots/college-football/players/full/",.data$athlete_id,".png")) %>%
         as.data.frame()
+
+
+      df <- df %>%
+        make_cfbfastR_data("Team roster data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}:Invalid arguments or no team roster data available!"))
@@ -567,7 +562,7 @@ cfbd_team_roster <- function(year, team = NULL) {
 }
 
 #' @title
-#' **Get composite team talent rankings for all teams in a given year**\cr
+#' **Get composite team talent rankings for all teams in a given year**
 #'
 #' @description
 #' Extracts team talent composite as sourced from 247 rankings
@@ -588,9 +583,9 @@ cfbd_team_roster <- function(year, team = NULL) {
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_team_talent()
+#'   try(cfbd_team_talent())
 #'
-#' cfbd_team_talent(year = 2018)
+#'   try(cfbd_team_talent(year = 2018))
 #' }
 #'
 cfbd_team_talent <- function(year = NULL) {
@@ -608,24 +603,30 @@ cfbd_team_talent <- function(year = NULL) {
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
 
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON() %>%
         as.data.frame() %>%
         mutate(talent = as.numeric(.data$talent))
+
+
+      df <- df %>%
+        make_cfbfastR_data("247sports team talent ratings from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}:Invalid arguments or no team talent data available!"))

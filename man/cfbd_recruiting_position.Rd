@@ -18,8 +18,8 @@ cfbd_recruiting_position(
 
 \item{team}{(\emph{String} optional): Team - Select a valid team, D-I football}
 
-\item{conference}{(\emph{String} optional): Conference abbreviation - Select a valid FBS conference\cr
-Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
+\item{conference}{(\emph{String} optional): Conference abbreviation - Select a valid FBS conference
+Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
 Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC}
 }
 \value{
@@ -39,11 +39,11 @@ Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC}
 }
 \examples{
 \donttest{
-   cfbd_recruiting_position(2018, team = "Texas")
+  try(cfbd_recruiting_position(2018, team = "Texas"))
 
-   cfbd_recruiting_position(2016, 2020, team = "Virginia")
+  try(cfbd_recruiting_position(2016, 2020, team = "Virginia"))
 
-   cfbd_recruiting_position(2015, 2020, conference = "SEC")
+  try(cfbd_recruiting_position(2015, 2020, conference = "SEC"))
 }
 
 }

@@ -1,34 +1,22 @@
-#' @name cfbd_drives
-#' @aliases drives cfbd_drives
+
 #' @title
 #' **CFBD Drives Endpoint**
 #' @description
 #' **Get college football game drives**
-#' ```r
-#' cfbd_drives(2018, week = 1, team = "TCU")
-#'
-#' cfbd_drives(2018, team = "Texas A&M", defense_conference = "SEC")
-#' ````
-#' @examples
-#' \donttest{
-#' cfbd_drives(2018, week = 1, team = "TCU")
-#'
-#' cfbd_drives(2018, team = "Texas A&M", defense_conference = "SEC")
-#' }
 #' @param year (*Integer* required): Year, 4 digit format (*YYYY*)
 #' @param season_type (*String* default regular): Select Season Type: regular, postseason, or both
 #' @param week (*Integer* optional): Week - values from 1-15, 1-14 for seasons pre-playoff, i.e. 2013 or earlier
 #' @param team (*String* optional): D-I Team
 #' @param offense_team (*String* optional): Offense D-I Team
 #' @param defense_team (*String* optional): Defense D-I Team
-#' @param conference (*String* optional): DI Conference abbreviation - Select a valid FBS conference\cr
-#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
+#' @param conference (*String* optional): DI Conference abbreviation - Select a valid FBS conference
+#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
 #' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC
-#' @param offense_conference (*String* optional): Offense DI Conference abbreviation - Select a valid FBS conference\cr
-#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
+#' @param offense_conference (*String* optional): Offense DI Conference abbreviation - Select a valid FBS conference
+#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
 #' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC
-#' @param defense_conference (*String* optional): Defense DI Conference abbreviation - Select a valid FBS conference\cr
-#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
+#' @param defense_conference (*String* optional): Defense DI Conference abbreviation - Select a valid FBS conference
+#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
 #' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC
 #' @return [cfbd_drives()] - A data frame with 23 variables as follows:
 #' \describe{
@@ -62,8 +50,6 @@
 #'   \item{`time_seconds_elapsed`:integer.}{Seconds elapsed during drive.}
 #' }
 #' @keywords Drives
-NULL
-
 #' @importFrom jsonlite fromJSON
 #' @importFrom httr GET
 #' @importFrom utils URLencode
@@ -72,6 +58,12 @@ NULL
 #' @import dplyr
 #' @import tidyr
 #' @export
+#' @examples
+#' \donttest{
+#'   try(cfbd_drives(2018, week = 1, team = "TCU"))
+#'
+#'   try(cfbd_drives(2018, team = "Texas A&M", defense_conference = "SEC"))
+#' }
 cfbd_drives <- function(year,
                         season_type = "regular",
                         week = NULL,
@@ -153,17 +145,19 @@ cfbd_drives <- function(year,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
+  df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
@@ -180,8 +174,21 @@ cfbd_drives <- function(year,
         dplyr::mutate(
           time_minutes_elapsed = ifelse(is.na(.data$time_minutes_elapsed), 0, .data$time_minutes_elapsed),
           time_seconds_elapsed = ifelse(is.na(.data$time_seconds_elapsed), 0, .data$time_seconds_elapsed)
-        ) %>%
-        as.data.frame()
+        )
+
+      # 2021 games with pbp data from another (non-ESPN) source include extra unclear columns for hours.
+      # Minutes and seconds from these games are also suspect
+      if("start_time.hours" %in% names(df)) {
+        df <- df %>%
+          dplyr::select(-.data$start_time.hours)
+      }
+      if("end_time.hours" %in% names(df)) {
+        df <- df %>%
+          dplyr::select(-.data$end_time.hours)
+      }
+
+      df <- df %>%
+        make_cfbfastR_data("Drives data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
         message(glue::glue("{Sys.time()}: Invalid arguments or no drives data available!"))
@@ -191,6 +198,5 @@ cfbd_drives <- function(year,
     finally = {
     }
   )
-
   return(df)
 }

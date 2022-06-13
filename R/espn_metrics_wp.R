@@ -5,7 +5,7 @@ NULL
 #' Graciously contributed by MrCaseB:
 #' @rdname espn_metrics
 #'
-#' @param game_id (*Integer* required): Game ID filter for querying a single game\cr
+#' @param game_id (*Integer* required): Game ID filter for querying a single game
 #' Can be found using the [cfbd_game_info()] function
 #'
 #' @return [espn_metrics_wp()] - A data frame with 5 variables:
@@ -28,7 +28,7 @@ NULL
 #' @export
 #' @examples
 #' \donttest{
-#' espn_metrics_wp(game_id = 401114164)
+#'   try(espn_metrics_wp(game_id = 401114164))
 #' }
 #'
 espn_metrics_wp <- function(game_id) {
@@ -66,6 +66,9 @@ espn_metrics_wp <- function(game_id) {
           .data$game_id, .data$play_id, .data$seconds_left,
           .data$home_win_percentage, .data$away_win_percentage, .data$tie_percentage
         )
+
+      espn_wp <- espn_wp %>%
+        make_cfbfastR_data("Win probability chart data from ESPN",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: game_id '{espn_game_id}' invalid or no ESPN win probability data available!"))

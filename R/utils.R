@@ -1,16 +1,69 @@
+.datatable.aware <- TRUE
+
 #' @keywords Internal
 #' @importFrom httr status_code
 #'
 check_status <- function(res) {
-  
-    x = status_code(res)
-    
-    if(x != 200) stop("The API returned an error", call. = FALSE) 
-  
-}
-# read qs files form an url
-qs_from_url <- function(url) qs::qdeserialize(curl::curl_fetch_memory(url)$content)
 
+    x = status_code(res)
+
+    if(x != 200) stop("The API returned an error", call. = FALSE)
+
+}
+
+
+
+
+# Progressively
+#
+# This function helps add progress-reporting to any function - given function `f()` and progressor `p()`, it will return a new function that calls `f()` and then (on-exiting) will call `p()` after every iteration.
+#
+# This is inspired by purrr's `safely`, `quietly`, and `possibly` function decorators.
+# Taken from nflreadr
+progressively <- function(f, p = NULL){
+  if(!is.null(p) && !inherits(p, "progressor")) stop("`p` must be a progressor function!")
+  if(is.null(p)) p <- function(...) NULL
+  force(f)
+
+  function(...){
+    on.exit(p("loading..."))
+    f(...)
+  }
+
+}
+
+
+#' @title
+#' **Load .csv / .csv.gz file from a remote connection**
+#' @description
+#' This is a thin wrapper on data.table::fread
+#' @param ... passed to data.table::fread
+#' @keywords Internal
+#' @importFrom data.table fread
+csv_from_url <- function(...){
+  data.table::fread(...)
+}
+
+
+#' @title
+#' **Load .rds file from a remote connection**
+#' @param url a character url
+#' @keywords Internal
+#' @return a dataframe as created by [`readRDS()`]
+#' @importFrom data.table data.table setDT
+rds_from_url <- function(url) {
+  con <- url(url)
+  on.exit(close(con))
+  load <- try(readRDS(con), silent = TRUE)
+
+  if (inherits(load, "try-error")) {
+    warning(paste0("Failed to readRDS from <", url, ">"), call. = FALSE)
+    return(data.table::data.table())
+  }
+
+  data.table::setDT(load)
+  return(load)
+}
 # read rds that has been pre-fetched
 read_raw_rds <- function(raw) {
   con <- gzcon(rawConnection(raw))
@@ -19,8 +72,9 @@ read_raw_rds <- function(raw) {
   return(ret)
 }
 
-#' @import utils
-utils::globalVariables(c("where"))
+# read qs files form an url
+qs_from_url <- function(url) qs::qdeserialize(curl::curl_fetch_memory(url)$content)
+
 
 # The function `message_completed` to create the green "...completed" message
 # only exists to hide the option `in_builder` in dots
@@ -45,10 +99,30 @@ user_message <- function(x, type) {
   }
 }
 
-# Identify sessions with sequential future resolving
-is_sequential <- function() inherits(future::plan(), "sequential")
+#' @import utils
+utils::globalVariables(c("where"))
+
+
 # check if a package is installed
 is_installed <- function(pkg) requireNamespace(pkg, quietly = TRUE)
+
+
+#' @importFrom magrittr %>%
+#' @usage lhs \%>\% rhs
+NULL
+
+#' @keywords internal
+"_PACKAGE"
+
+#' @importFrom Rcpp getRcppVersion
+#' @importFrom RcppParallel defaultNumThreads
+NULL
+
+
+`%c%` <- function(x,y){
+  ifelse(!is.na(x),x,y)
+}
+
 # custom mode function from https://stackoverflow.com/questions/2547402/is-there-a-built-in-function-for-finding-the-mode/8189441
 custom_mode <- function(x, na.rm = TRUE) {
   if (na.rm) {
@@ -58,7 +132,7 @@ custom_mode <- function(x, na.rm = TRUE) {
   return(ux[which.max(tabulate(match(x, ux)))])
 }
 
-most_recent_season <- function() {
+most_recent_cfb_season <- function() {
   dplyr::if_else(
     as.double(substr(Sys.Date(), 6, 7)) >= 9,
     as.double(substr(Sys.Date(), 1, 4)),
@@ -100,4 +174,43 @@ write_pbp <- function(seasons, dbConnection, tablename){
     DBI::dbWriteTable(dbConnection, tablename, pbp, append = TRUE)
     p("loading...")
   }, p)
+}
+
+# Functions for custom class
+# turn a data.frame into a tibble/cfbfastR_data
+make_cfbfastR_data <- function(df,type,timestamp){
+  out <- df %>%
+    tidyr::as_tibble()
+
+  class(out) <- c("cfbfastR_data","tbl_df","tbl","data.table","data.frame")
+  attr(out,"cfbfastR_timestamp") <- timestamp
+  attr(out,"cfbfastR_type") <- type
+  return(out)
+}
+
+#' @export
+#' @noRd
+print.cfbfastR_data <- function(x,...) {
+  cli::cli_rule(left = "{attr(x,'cfbfastR_type')}",right = "{.emph cfbfastR {utils::packageVersion('cfbfastR')}}")
+
+  if(!is.null(attr(x,'cfbfastR_timestamp'))) {
+    cli::cli_alert_info(
+      "Data updated: {.field {format(attr(x,'cfbfastR_timestamp'), tz = Sys.timezone(), usetz = TRUE)}}"
+    )
+  }
+
+  NextMethod(print,x)
+  invisible(x)
+}
+
+
+# rbindlist but maintain attributes of last file, taken from nflreadr
+rbindlist_with_attrs <- function(dflist){
+
+  cfbfastR_timestamp <- attr(dflist[[length(dflist)]], "cfbfastR_timestamp")
+  cfbfastR_type <- attr(dflist[[length(dflist)]], "cfbfastR_type")
+  out <- data.table::rbindlist(dflist, use.names = TRUE, fill = TRUE)
+  attr(out,"cfbfastR_timestamp") <- cfbfastR_timestamp
+  attr(out,"cfbfastR_type") <- cfbfastR_type
+  out
 }

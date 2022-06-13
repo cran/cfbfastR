@@ -28,7 +28,7 @@
 #' @importFrom dplyr rename
 #' @examples
 #' \donttest{
-#'   cfbd_venues()
+#'   try(cfbd_venues())
 #' }
 #' @export
 
@@ -53,6 +53,10 @@ cfbd_venues <- function() {
     jsonlite::fromJSON() %>%
     dplyr::rename(venue_id = .data$id) %>%
     as.data.frame()
+
+
+  df <- df %>%
+    make_cfbfastR_data("Venue data from CollegeFootballData.com",Sys.time())
 
   return(df)
 }

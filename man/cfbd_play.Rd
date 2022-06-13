@@ -11,14 +11,18 @@ College football plays data
 \item{\code{cfbd_play_stats_types()}:}{ Gets CFBD play stat types.}
 \item{\code{cfbd_play_types()}:}{ Gets CFBD play types.}
 }
-\subsection{\strong{Pull first 3 weeks of 2020 season using \code{cfbd_plays()}}}{\if{html}{\out{<div class="sourceCode r">}}\preformatted{ year_vector <- 2020
+}
+\details{
+\subsection{\strong{Pull first 3 weeks of 2020 season using \code{cfbd_plays()}}}{
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{ year_vector <- 2020
  week_vector <- 1:3
  weekly_year_df <- expand.grid(year = year_vector, week = week_vector)
  tictoc::tic()
  year_split <- split(weekly_year_df, weekly_year_df$year)
  for (i in 1:length(year_split)) \{
    i <- 1
-   future::plan("multisession")
+
    progressr::with_progress(\{
       year_split[[i]] <- year_split[[i]] \%>\%
          dplyr::mutate(
@@ -43,15 +47,21 @@ College football plays data
 }\if{html}{\out{</div>}}
 }
 
-\subsection{\strong{Gets player info associated by play}}{\if{html}{\out{<div class="sourceCode r">}}\preformatted{cfbd_play_stats_player(game_id = 401110722)
+\subsection{\strong{Gets player info associated by play}}{
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{cfbd_play_stats_player(game_id = 401110722)
 }\if{html}{\out{</div>}}
 }
 
-\subsection{\strong{Gets CFBD play stat types}}{\if{html}{\out{<div class="sourceCode r">}}\preformatted{cfbd_play_stats_types()
+\subsection{\strong{Gets CFBD play stat types}}{
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{cfbd_play_stats_types()
 }\if{html}{\out{</div>}}
 }
 
-\subsection{\strong{Gets CFBD play types}}{\if{html}{\out{<div class="sourceCode r">}}\preformatted{cfbd_play_types()
+\subsection{\strong{Gets CFBD play types}}{
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{cfbd_play_types()
 }\if{html}{\out{</div>}}
 }
 }

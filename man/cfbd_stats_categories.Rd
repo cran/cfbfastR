@@ -10,7 +10,6 @@ cfbd_stats_categories()
 \code{\link[=cfbd_stats_categories]{cfbd_stats_categories()}} A data frame with 38 values:
 \describe{
 \item{name}{Statistics Categories}
-...
 }
 }
 \description{
@@ -18,7 +17,7 @@ This function identifies all Stats Categories identified in the regular stats en
 }
 \examples{
 \donttest{
-   cfbd_stats_categories()
+   try(cfbd_stats_categories())
 }
 }
 \keyword{Categories}

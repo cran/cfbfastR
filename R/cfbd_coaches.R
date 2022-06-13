@@ -1,13 +1,9 @@
-#' @name cfbd_coaches
-#' @aliases coaches cfbd_coaches
 #' @title
 #' **CFBD Coaches Endpoint Overview**
 #' @description
 #' **Coach information search**
 #' A coach search function which provides coaching records and school history for a given coach
-#' ```
-#' cfbd_coaches(first = "Nick", last = "Saban", team = "alabama")
-#' ````
+#'
 #' @param first (*String* optional): First name for the coach you are trying to look up
 #' @param last (*String* optional): Last name for the coach you are trying to look up
 #' @param team (*String* optional): Team - Select a valid team, D1 football
@@ -43,8 +39,8 @@
 #' @import purrr
 #' @export
 #' @examples
-#'\donttest{
-#'   cfbd_coaches(first = "Nick", last = "Saban", team = "alabama")
+#' \donttest{
+#'   try(cfbd_coaches(first = "Nick", last = "Saban", team = "alabama"))
 #' }
 cfbd_coaches <- function(first = NULL,
                          last = NULL,
@@ -97,27 +93,30 @@ cfbd_coaches <- function(first = NULL,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON() %>%
-        furrr::future_map_if(is.data.frame, list) %>%
+        purrr::map_if(is.data.frame, list) %>%
         dplyr::as_tibble() %>%
         tidyr::unnest(.data$seasons) %>%
-        as.data.frame() %>%
         dplyr::arrange(.data$year)
+
+      df <- df %>%
+        make_cfbfastR_data("Coaches data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
         message(glue::glue("{Sys.time()}: Invalid arguments or no coaches data available!"))

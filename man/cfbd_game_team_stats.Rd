@@ -23,11 +23,11 @@ cfbd_game_team_stats(
 
 \item{team}{(\emph{String} optional): D-I Team}
 
-\item{conference}{(\emph{String} optional): Conference abbreviation - Select a valid FBS conference\cr
-Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
-Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC\cr}
+\item{conference}{(\emph{String} optional): Conference abbreviation - Select a valid FBS conference
+Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
+Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC}
 
-\item{game_id}{(\emph{Integer} optional): Game ID filter for querying a single game\cr
+\item{game_id}{(\emph{Integer} optional): Game ID filter for querying a single game
 Can be found using the \code{\link[=cfbd_game_info]{cfbd_game_info()}} function}
 
 \item{rows_per_team}{(\emph{Integer} default 1): Both Teams for each game on one or two row(s), Options: 1 or 2}
@@ -39,6 +39,8 @@ Can be found using the \code{\link[=cfbd_game_info]{cfbd_game_info()}} function}
 \item{\code{school}: character.}{Team name.}
 \item{\code{conference}: character.}{Conference of the team.}
 \item{\code{home_away}: character.}{Home/Away Flag.}
+\item{\code{opponent}: character.}{Opponent team name.}
+\item{\code{opponent_conference}: character.}{Conference of the opponent team.}
 \item{\code{points}: integer.}{Team points.}
 \item{\code{total_yards}: character.}{Team total yards.}
 \item{\code{net_passing_yards}: character.}{Team net passing yards.}
@@ -75,8 +77,6 @@ Can be found using the \code{\link[=cfbd_game_info]{cfbd_game_info()}} function}
 \item{\code{defensive_tds}: character.}{Team defensive touchdowns.}
 \item{\code{total_penalties_yards}: character.}{Team total penalty yards.}
 \item{\code{possession_time}: character.}{Team time of possession.}
-\item{\code{conference_allowed}: character.}{Conference of the opponent team.}
-\item{\code{home_away_allowed}: character.}{Flag for if the opponent was the home or away team.}
 \item{\code{points_allowed}: integer.}{Points for the opponent.}
 \item{\code{total_yards_allowed}: character.}{Opponent total yards.}
 \item{\code{net_passing_yards_allowed}: character.}{Opponent net passing yards.}
@@ -120,9 +120,9 @@ Can be found using the \code{\link[=cfbd_game_info]{cfbd_game_info()}} function}
 }
 \examples{
 \donttest{
-  cfbd_game_team_stats(2019, team = "LSU")
+  try(cfbd_game_team_stats(2019, team = "LSU"))
 
-  cfbd_game_team_stats(2013, team = "Florida State")
+  try(cfbd_game_team_stats(2013, team = "Florida State"))
 }
 }
 \keyword{Game}

@@ -81,11 +81,11 @@ NULL
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_rankings(year = 2019, week = 12)
+#'   try(cfbd_rankings(year = 2019, week = 12))
 #'
-#' cfbd_rankings(year = 2018, week = 14)
+#'   try(cfbd_rankings(year = 2018, week = 14))
 #'
-#' cfbd_rankings(year = 2013, season_type = "postseason")
+#'   try(cfbd_rankings(year = 2013, season_type = "postseason"))
 #' }
 #'
 cfbd_rankings <- function(year, week = NULL, season_type = "regular") {
@@ -129,7 +129,7 @@ cfbd_rankings <- function(year, week = NULL, season_type = "regular") {
       polls <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON(flatten = TRUE) %>%
-        furrr::future_map_if(is.data.frame, list) %>%
+        purrr::map_if(is.data.frame, list) %>%
         dplyr::as_tibble() %>%
         tidyr::unnest(.data$polls) %>%
         tidyr::unnest(.data$ranks) %>%
@@ -139,8 +139,11 @@ cfbd_rankings <- function(year, week = NULL, season_type = "regular") {
         dplyr::rename(
           season_type = .data$seasonType,
           first_place_votes = .data$firstPlaceVotes
-        ) %>%
-        as.data.frame()
+        )
+
+
+      polls <- polls %>%
+        make_cfbfastR_data("Rankings data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no rankings data available!"))
@@ -203,11 +206,11 @@ cfbd_rankings <- function(year, week = NULL, season_type = "regular") {
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_ratings_sp(year = 2018)
+#'   try(cfbd_ratings_sp(year = 2018))
 #'
-#' cfbd_ratings_sp(team = "Texas A&M")
+#'   try(cfbd_ratings_sp(team = "Texas A&M"))
 #'
-#' cfbd_ratings_sp(year = 2019, team = "Texas")
+#'   try(cfbd_ratings_sp(year = 2019, team = "Texas"))
 #' }
 #'
 cfbd_ratings_sp <- function(year = NULL, team = NULL) {
@@ -275,8 +278,11 @@ cfbd_ratings_sp <- function(year = NULL, team = NULL) {
           defense_havoc_front_seven = .data$defense.havoc.frontSeven,
           defense_havoc_db = .data$defense.havoc.db,
           special_teams_rating = .data$specialTeams.rating
-        ) %>%
-        as.data.frame()
+        )
+
+
+      df <- df %>%
+        make_cfbfastR_data("SP+ data from CollegeFootballData.com",Sys.time())
     },
     error = function(e){
       message(glue::glue("{Sys.time()}: Invalid arguments or no S&P+ ratings data available!"))
@@ -292,8 +298,8 @@ cfbd_ratings_sp <- function(year = NULL, team = NULL) {
 #' @title
 #' **Get conference level SP historical rating data**
 #' @param year (*Integer* optional): Year, 4 digit format (*YYYY*)
-#' @param conference (*String* optional): Conference abbreviation - S&P+ information by conference\cr
-#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
+#' @param conference (*String* optional): Conference abbreviation - S&P+ information by conference
+#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
 #' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC
 #'
 #' @return [cfbd_ratings_sp_conference()] - A data frame with 25 variables:
@@ -335,11 +341,11 @@ cfbd_ratings_sp <- function(year = NULL, team = NULL) {
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_ratings_sp_conference(year = 2019)
+#'   try(cfbd_ratings_sp_conference(year = 2019))
 #'
-#' cfbd_ratings_sp_conference(year = 2012, conference = "SEC")
+#'   try(cfbd_ratings_sp_conference(year = 2012, conference = "SEC"))
 #'
-#' cfbd_ratings_sp_conference(year = 2016, conference = "ACC")
+#'   try(cfbd_ratings_sp_conference(year = 2016, conference = "ACC"))
 #' }
 #'
 cfbd_ratings_sp_conference <- function(year = NULL, conference = NULL) {
@@ -403,8 +409,11 @@ cfbd_ratings_sp_conference <- function(year = NULL, conference = NULL) {
           defense_havoc_front_seven = .data$defense.havoc.frontSeven,
           defense_havoc_db = .data$defense.havoc.db,
           special_teams_rating = .data$specialTeams.rating
-        ) %>%
-        as.data.frame()
+        )
+
+
+      df <- df %>%
+        make_cfbfastR_data("Conference SP+ data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no conference-level S&P+ ratings data available!"))
@@ -425,8 +434,8 @@ cfbd_ratings_sp_conference <- function(year = NULL, conference = NULL) {
 #'
 #' @param year (*Integer* optional): Year, 4 digit format (*YYYY*)
 #' @param team (*String* optional): D-I Team
-#' @param conference (*String* optional): Conference abbreviation - SRS information by conference\cr
-#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
+#' @param conference (*String* optional): Conference abbreviation - SRS information by conference
+#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
 #' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC
 #'
 #' @return [cfbd_ratings_srs()] - A data frame with 6 variables:
@@ -447,9 +456,9 @@ cfbd_ratings_sp_conference <- function(year = NULL, conference = NULL) {
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_ratings_srs(year = 2019, team = "Texas")
+#'   try(cfbd_ratings_srs(year = 2019, team = "Texas"))
 #'
-#' cfbd_ratings_srs(year = 2018, conference = "SEC")
+#'   try(cfbd_ratings_srs(year = 2018, conference = "SEC"))
 #' }
 #'
 cfbd_ratings_srs <- function(year = NULL, team = NULL, conference = NULL) {
@@ -505,6 +514,10 @@ cfbd_ratings_srs <- function(year = NULL, team = NULL, conference = NULL) {
           rating = as.numeric(.data$rating),
           ranking = as.integer(.data$ranking)
         )
+
+
+      df <- df %>%
+        make_cfbfastR_data("SRS data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no simple rating system (SRS) data available!"))
@@ -526,8 +539,8 @@ cfbd_ratings_srs <- function(year = NULL, team = NULL, conference = NULL) {
 #' @param year (*Integer* optional): Year, 4 digit format (*YYYY*)
 #' @param week (*Integer* optional): Maximum Week of ratings.
 #' @param team (*String* optional): D-I Team
-#' @param conference (*String* optional): Conference abbreviation - SRS information by conference\cr
-#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
+#' @param conference (*String* optional): Conference abbreviation - SRS information by conference
+#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
 #' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC
 #'
 #' @return [cfbd_ratings_elo()] - A data frame with 6 variables:
@@ -548,9 +561,9 @@ cfbd_ratings_srs <- function(year = NULL, team = NULL, conference = NULL) {
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_ratings_elo(year = 2019, team = "Texas")
+#'   try(cfbd_ratings_elo(year = 2019, team = "Texas"))
 #'
-#' cfbd_ratings_elo(year = 2018, conference = "SEC")
+#'   try(cfbd_ratings_elo(year = 2018, conference = "SEC"))
 #' }
 #'
 cfbd_ratings_elo <- function(year = NULL, week = NULL, team = NULL, conference = NULL) {
@@ -605,8 +618,11 @@ cfbd_ratings_elo <- function(year = NULL, week = NULL, team = NULL, conference =
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
-        jsonlite::fromJSON() %>%
-        as.data.frame()
+        jsonlite::fromJSON()
+
+
+      df <- df %>%
+        make_cfbfastR_data("ELO ratings from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no elo rating system data available!"))

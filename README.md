@@ -1,53 +1,56 @@
 
 # 
 
-# **cfbfastR** <a href='https://saiemgilani.github.io/cfbfastR/'><img src='man/figures/logo.png' align="right" height="150" /></a>
+# **cfbfastR** <a href='https://cfbfastR.sportsdataverse.org/'><img src='https://raw.githubusercontent.com/sportsdataverse/cfbfastR/main/logo.png' align="right" width="20%" min-width="100px"/></a>
 
 <!-- badges: start -->
 
-[![Version-Number](https://img.shields.io/github/r-package/v/saiemgilani/cfbfastR?label=cfbfastR&logo=R&style=for-the-badge)](https://github.com/saiemgilani/cfbfastR/)
-[![R-CMD-check](https://img.shields.io/github/workflow/status/saiemgilani/cfbfastR/R-CMD-check?label=R-CMD-Check&logo=R&logoColor=white&style=for-the-badge)](https://github.com/saiemgilani/cfbfastR/actions/workflows/R-CMD-check.yaml)
-[![Lifecycle:maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg?style=for-the-badge&logo=github)](https://github.com/saiemgilani/cfbfastR/)
-[![Contributors](https://img.shields.io/github/contributors/saiemgilani/cfbfastR?style=for-the-badge)](https://github.com/saiemgilani/cfbfastR/graphs/contributors)
+[![CRAN
+version](https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=success&label=CRAN%20version&prefix=v&query=%24.Version&url=https%3A%2F%2Fcrandb.r-pkg.org%2FcfbfastR)](https://CRAN.R-project.org/package=cfbfastR)
+[![CRAN
+downloads](https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=success&label=Downloads&query=%24%5B0%5D.downloads&url=https%3A%2F%2Fcranlogs.r-pkg.org%2Fdownloads%2Ftotal%2F2021-10-26%3Alast-day%2FcfbfastR)](https://CRAN.R-project.org/package=cfbfastR)
+[![Version-Number](https://img.shields.io/github/r-package/v/sportsdataverse/cfbfastR?label=cfbfastR&logo=R&style=for-the-badge)](https://github.com/sportsdataverse/cfbfastR/)
+[![R-CMD-check](https://img.shields.io/github/workflow/status/sportsdataverse/cfbfastR/R-CMD-check?label=R-CMD-Check&logo=R&logoColor=white&style=for-the-badge)](https://github.com/sportsdataverse/cfbfastR/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle:maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg?style=for-the-badge&logo=github)](https://github.com/sportsdataverse/cfbfastR/)
+[![Contributors](https://img.shields.io/github/contributors/sportsdataverse/cfbfastR?style=for-the-badge)](https://github.com/sportsdataverse/cfbfastR/graphs/contributors)
 [![Twitter
 Follow](https://img.shields.io/twitter/follow/cfbfastR?color=blue&label=%40cfbfastR&logo=twitter&style=for-the-badge)](https://twitter.com/cfbfastR)
+[![Twitter
+Follow](https://img.shields.io/twitter/follow/SportsDataverse?color=blue&label=%40SportsDataverse&logo=twitter&style=for-the-badge)](https://twitter.com/SportsDataverse)
 <!-- badges: end -->
 
-The goal of [**`cfbfastR`**](https://saiemgilani.github.io/cfbfastR/) is
+The goal of [**`cfbfastR`**](https://cfbfastR.sportsdataverse.org/) is
 to provide the community with an R package for working with CFB data. It
 is an R API wrapper around <https://collegefootballdata.com/>. Beyond
 data aggregation and tidying ease, one of the multitude of services that
-[**`cfbfastR`**](https://saiemgilani.github.io/cfbfastR/) provides is
-for benchmarking open-source expected points and win probability
-metrics.
+[**`cfbfastR`**](https://cfbfastR.sportsdataverse.org/) provides is for
+benchmarking open-source expected points and win probability metrics.
 
 ## **Installation**
 
+You can install the CRAN version of
+[**`cfbfastR`**](https://CRAN.R-project.org/package=cfbfastR) with:
+
+``` r
+install.packages("cfbfastR")
+```
+
 You can install the released version of
-[**`cfbfastR`**](https://github.com/saiemgilani/cfbfastR/) from
-[GitHub](https://github.com/saiemgilani/cfbfastR) with:
+[**`cfbfastR`**](https://github.com/sportsdataverse/cfbfastR/) from
+[GitHub](https://github.com/sportsdataverse/cfbfastR) with:
 
 ``` r
 # You can install using the pacman package using the following code:
 if (!requireNamespace('pacman', quietly = TRUE)){
   install.packages('pacman')
 }
-pacman::p_load_current_gh("saiemgilani/cfbfastR", dependencies = TRUE, update = TRUE)
-```
-
-``` r
-# if you would prefer devtools installation
-if (!requireNamespace('devtools', quietly = TRUE)){
-  install.packages('devtools')
-}
-# Alternatively, using the devtools package:
-devtools::install_github(repo = "saiemgilani/cfbfastR")
+pacman::p_load_current_gh("sportsdataverse/cfbfastR", dependencies = TRUE, update = TRUE)
 ```
 
 ## **Breaking Changes**
 
 [**Full News on
-Releases**](https://saiemgilani.github.io/cfbfastR/news/index.html)
+Releases**](https://cfbfastR.sportsdataverse.org/news/index.html)
 
 #### **College Football Data API Keys**
 
@@ -85,15 +88,17 @@ functions without any other changes.
 Sys.setenv(CFBD_API_KEY = "XXXX-YOUR-API-KEY-HERE-XXXXX")
 ```
 
-# Follow [cfbfastR](https://twitter.com/cfbfastR) on Twitter and star this repo
+## Follow [cfbfastR](https://twitter.com/cfbfastR) and the [SportsDataverse](https://twitter.com/SportsDataverse) on Twitter and star this repo
 
 [![Twitter
 Follow](https://img.shields.io/twitter/follow/cfbfastR?color=blue&label=%40cfbfastR&logo=twitter&style=for-the-badge)](https://twitter.com/cfbfastR)
+[![Twitter
+Follow](https://img.shields.io/twitter/follow/SportsDataverse?color=blue&label=%40SportsDataverse&logo=twitter&style=for-the-badge)](https://twitter.com/SportsDataverse)
 
 [![GitHub
-stars](https://img.shields.io/github/stars/saiemgilani/cfbfastR.svg?color=eee&logo=github&style=for-the-badge&label=Star%20cfbfastR&maxAge=2592000)](https://github.com/saiemgilani/cfbfastR/stargazers/)
+stars](https://img.shields.io/github/stars/sportsdataverse/cfbfastR.svg?color=eee&logo=github&style=for-the-badge&label=Star%20cfbfastR&maxAge=2592000)](https://github.com/sportsdataverse/cfbfastR/stargazers/)
 
-# **Our Authors**
+## **Our Authors**
 
 -   [Saiem Gilani](https://twitter.com/saiemgilani)  
     <a href="https://twitter.com/saiemgilani" target="blank"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&label=%40saiemgilani&logo=twitter&style=for-the-badge" alt="@saiemgilani" /></a>
@@ -149,6 +154,10 @@ stars](https://img.shields.io/github/stars/saiemgilani/cfbfastR.svg?color=eee&lo
     <a href="https://twitter.com/mrcaseb" target="blank"><img src="https://img.shields.io/twitter/follow/mrcaseb?color=blue&label=%40mrcaseb&logo=twitter&style=for-the-badge" alt="@mrcaseb" /></a>
     <a href="https://github.com/mrcaseb" target="blank"><img src="https://img.shields.io/github/followers/mrcaseb?color=eee&logo=Github&style=for-the-badge" alt="@mrcaseb" /></a>
 
+-   [John Edwards](https://twitter.com/John_B_Edwards) </br>
+    <a href="https://twitter.com/John_B_Edwards" target="blank"><img src="https://img.shields.io/twitter/follow/John_B_Edwards?color=blue&label=%40John_B_Edwards&logo=twitter&style=for-the-badge" alt="@John_B_Edwards" /></a>
+    <a href="https://github.com/john-b-edwards" target="blank"><img src="https://img.shields.io/github/followers/john-b-edwards?color=eee&logo=Github&style=for-the-badge" alt="@john-b-edwards" /></a>
+
 # **Authors Emeritus - `cfbscrapR`\[archived\]**
 
 -   [Meyappan Subbiah](https://twitter.com/msubbaiah1)  
@@ -165,16 +174,16 @@ stars](https://img.shields.io/github/stars/saiemgilani/cfbfastR.svg?color=eee&lo
 
 ## **Citations**
 
-To cite the [**`cfbfastR`**](https://saiemgilani.github.io/cfbfastR/) R
+To cite the [**`cfbfastR`**](https://cfbfastR.sportsdataverse.org/) R
 package in publications, use:
 
 BibTex Citation
 
 ``` bibtex
-@misc{sgetal2021cfbfastr,
+@misc{gilani_et_al_2021_cfbfastr,
   author = {Saiem Gilani and Akshay Easwaran and Jared Lee and Eric Hess},
   title = {cfbfastR: The SportsDataverse's R Package for College Football Data.},
-  url = {https://saiemgilani.github.io/cfbfastR/},
+  url = {https://cfbfastR.sportsdataverse.org/},
   year = {2021}
 }
 ```

@@ -2,10 +2,6 @@
 % Please edit documentation in R/cfb_pbp.R
 \name{update_cfb_db}
 \alias{update_cfb_db}
-\alias{cfb_db}
-\alias{cfb}
-\alias{database}
-\alias{cfb_pbp_db}
 \title{\strong{Update or create a cfbfastR play-by-play database}}
 \usage{
 update_cfb_db(

@@ -11,8 +11,8 @@ cfbd_ratings_srs(year = NULL, team = NULL, conference = NULL)
 
 \item{team}{(\emph{String} optional): D-I Team}
 
-\item{conference}{(\emph{String} optional): Conference abbreviation - SRS information by conference\cr
-Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
+\item{conference}{(\emph{String} optional): Conference abbreviation - SRS information by conference
+Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
 Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC}
 }
 \value{
@@ -31,9 +31,9 @@ At least one of \strong{year} or \strong{team} must be specified for the functio
 }
 \examples{
 \donttest{
-cfbd_ratings_srs(year = 2019, team = "Texas")
+  try(cfbd_ratings_srs(year = 2019, team = "Texas"))
 
-cfbd_ratings_srs(year = 2018, conference = "SEC")
+  try(cfbd_ratings_srs(year = 2018, conference = "SEC"))
 }
 
 }

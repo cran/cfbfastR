@@ -11,6 +11,8 @@
 #' \item{`cfbd_metrics_wp_pregame()`:}{ Get pre-game win probability data from CFBD API.}
 #' \item{`cfbd_metrics_wp()`:}{ Get win probability chart data from CFBD API.}
 #' }
+#'
+#' @details
 #' ### **Get team game averages for predicted points added (PPA)**
 #' ```r
 #'   cfbd_metrics_ppa_games(year = 2019, team = "TCU")
@@ -36,16 +38,15 @@
 #' ```r
 #' cfbd_metrics_ppa_predicted(down = 1, distance = 10)
 #' ```
-#'
 NULL
 #' @title
 #' **Get team game averages for predicted points added (PPA)**
 #' @param year (*Integer* required): Year, 4 digit format (*YYYY*)
 #' @param week (*Integer* optional): Week - values range from 1-15, 1-14 for seasons pre-playoff, i.e. 2013 or earlier
 #' @param team (*String* optional): D-I Team
-#' @param conference (*String* optional): Conference abbreviation - Select a valid FBS conference\cr
-#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
-#' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC\cr
+#' @param conference (*String* optional): Conference abbreviation - Select a valid FBS conference
+#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
+#' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC
 #' @param excl_garbage_time (*Logical* default FALSE): Select whether to exclude Garbage Time (TRUE or FALSE)
 #'
 #' @return [cfbd_metrics_ppa_games()] - A data frame with 18 variables:
@@ -80,9 +81,9 @@ NULL
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_metrics_ppa_games(year = 2019, team = "TCU")
+#'   try(cfbd_metrics_ppa_games(year = 2019, team = "TCU"))
 #' }
-#'
+
 cfbd_metrics_ppa_games <- function(year,
                                    week = NULL,
                                    team = NULL,
@@ -130,18 +131,19 @@ cfbd_metrics_ppa_games <- function(year,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content, flatten and return result as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
@@ -153,6 +155,9 @@ cfbd_metrics_ppa_games <- function(year,
       df <- df %>%
         dplyr::rename(game_id = .data$gameId) %>%
         as.data.frame()
+
+      df <- df %>%
+        make_cfbfastR_data("PPA data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no CFBData metrics PPA games data available!"))
@@ -173,12 +178,12 @@ cfbd_metrics_ppa_games <- function(year,
 #' @param year (*Integer* required): Year, 4 digit format (*YYYY*)
 #' @param week (*Integer* optional): Week - values range from 1-15, 1-14 for seasons pre-playoff, i.e. 2013 or earlier
 #' @param team (*String* optional): D-I Team. Required if year not provided.
-#' @param position (*string* optional): Position abbreviation of the player you are searching for.\cr
-#' Position Group  - options include:\cr
-#'  * Offense: QB, RB, FB, TE,  OL, G, OT, C, WR\cr
-#'  * Defense: DB, CB, S, LB,  DE, DT, NT, DL\cr
-#'  * Special Teams: K, P, LS, PK\cr
-#' @param athlete_id (*Integer* optional): Athlete ID filter for querying a single athlete\cr
+#' @param position (*string* optional): Position abbreviation of the player you are searching for.
+#' Position Group  - options include:
+#'  * Offense: QB, RB, FB, TE,  OL, G, OT, C, WR
+#'  * Defense: DB, CB, S, LB,  DE, DT, NT, DL
+#'  * Special Teams: K, P, LS, PK
+#' @param athlete_id (*Integer* optional): Athlete ID filter for querying a single athlete
 #' Can be found using the [cfbd_player_info()] function.
 #' @param threshold (*Integer* optional): Minimum threshold of plays.
 #' @param excl_garbage_time (*Logical* default FALSE): Select whether to exclude Garbage Time (TRUE or FALSE)
@@ -206,9 +211,9 @@ cfbd_metrics_ppa_games <- function(year,
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_metrics_ppa_players_games(year = 2019, week = 3, team = "TCU")
+#'   try(cfbd_metrics_ppa_players_games(year = 2019, week = 3, team = "TCU"))
 #' }
-#'
+
 cfbd_metrics_ppa_players_games <- function(year = NULL,
                                            week = NULL,
                                            team = NULL,
@@ -277,23 +282,27 @@ cfbd_metrics_ppa_players_games <- function(year = NULL,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content, flatten and return result as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON(flatten = TRUE)
       colnames(df) <- gsub("averagePPA.", "avg_PPA_", colnames(df))
+
+      df <- df %>%
+        make_cfbfastR_data("Player PPA data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no CFBData metrics PPA game-level players data available!"))
@@ -312,15 +321,15 @@ cfbd_metrics_ppa_players_games <- function(year = NULL,
 #' **Get player season averages for predicted points added (PPA)**
 #' @param year (*Integer* required): Year, 4 digit format (*YYYY*)
 #' @param team (*String* optional): D-I Team
-#' @param conference (*String* optional): Conference abbreviation - S&P+ information by conference\cr
-#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC\cr
-#' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC\cr
-#' @param position (*string* optional): Position abbreviation of the player you are searching for.\cr
-#' Position Group  - options include:\cr
-#'  * Offense: QB, RB, FB, TE,  OL, G, OT, C, WR\cr
-#'  * Defense: DB, CB, S, LB,  DE, DT, NT, DL\cr
-#'  * Special Teams: K, P, LS, PK\cr
-#' @param athlete_id (*Integer* optional): Athlete ID filter for querying a single athlete\cr
+#' @param conference (*String* optional): Conference abbreviation - S&P+ information by conference
+#' Conference abbreviations P5: ACC, B12, B1G, SEC, PAC
+#' Conference abbreviations G5 and FBS Independents: CUSA, MAC, MWC, Ind, SBC, AAC
+#' @param position (*string* optional): Position abbreviation of the player you are searching for.
+#' Position Group  - options include:
+#'  * Offense: QB, RB, FB, TE,  OL, G, OT, C, WR
+#'  * Defense: DB, CB, S, LB,  DE, DT, NT, DL
+#'  * Special Teams: K, P, LS, PK
+#' @param athlete_id (*Integer* optional): Athlete ID filter for querying a single athlete
 #' Can be found using the [cfbd_player_info()] function.
 #' @param threshold (*Integer* optional): Minimum threshold of plays.
 #' @param excl_garbage_time (*Logical* default FALSE): Select whether to exclude Garbage Time (TRUE or FALSE)
@@ -362,7 +371,7 @@ cfbd_metrics_ppa_players_games <- function(year = NULL,
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_metrics_ppa_players_season(year = 2019, team = "TCU")
+#'   try(cfbd_metrics_ppa_players_season(year = 2019, team = "TCU"))
 #' }
 #'
 cfbd_metrics_ppa_players_season <- function(year = NULL,
@@ -434,18 +443,19 @@ cfbd_metrics_ppa_players_season <- function(year = NULL,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content, flatten and return result as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
@@ -457,8 +467,10 @@ cfbd_metrics_ppa_players_season <- function(year = NULL,
 
       df <- df %>%
         dplyr::rename(athlete_id = .data$id) %>%
-        dplyr::arrange(-.data$countable_plays) %>%
-        as.data.frame()
+        dplyr::arrange(-.data$countable_plays)
+
+      df <- df %>%
+        make_cfbfastR_data("Player season PPA data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no CFBData metrics PPA season-level players data available!"))
@@ -494,11 +506,11 @@ cfbd_metrics_ppa_players_season <- function(year = NULL,
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_metrics_ppa_predicted(down = 1, distance = 10)
+#'   try(cfbd_metrics_ppa_predicted(down = 1, distance = 10))
 #'
-#' cfbd_metrics_ppa_predicted(down = 3, distance = 10)
+#'   try(cfbd_metrics_ppa_predicted(down = 3, distance = 10))
 #' }
-#'
+
 cfbd_metrics_ppa_predicted <- function(down,
                                        distance) {
   # Check if down is numeric
@@ -520,24 +532,29 @@ cfbd_metrics_ppa_predicted <- function(down,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
 
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content, flatten and return result as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON()
       colnames(df) <- gsub("Line", "_line", colnames(df))
       colnames(df) <- gsub("Points", "_points", colnames(df))
+
+      df <- df %>%
+        make_cfbfastR_data("PPA data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no CFBData metrics PPA predicted data available!"))
@@ -555,9 +572,9 @@ cfbd_metrics_ppa_predicted <- function(down,
 #' **Get team averages for predicted points added (PPA)**
 #' @param year (*Integer* optional): Year, 4 digit format (*YYYY*)
 #' @param team (*String* optional): D-I Team
-#' @param conference (*String* optional): Conference name - select a valid FBS conference\cr
-#' Conference names P5: ACC,  Big 12, Big Ten, SEC, Pac-12\cr
-#' Conference names G5 and FBS Independents: Conference USA, Mid-American, Mountain West, FBS Independents, American Athletic\cr
+#' @param conference (*String* optional): Conference name - select a valid FBS conference
+#' Conference names P5: ACC,  Big 12, Big Ten, SEC, Pac-12
+#' Conference names G5 and FBS Independents: Conference USA, Mid-American, Mountain West, FBS Independents, American Athletic
 #' @param excl_garbage_time (*Logical* default FALSE): Select whether to exclude Garbage Time (TRUE or FALSE)
 #'
 #' @return [cfbd_metrics_ppa_teams()] - A data frame with 21 variables:
@@ -595,9 +612,9 @@ cfbd_metrics_ppa_predicted <- function(down,
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_metrics_ppa_teams(year = 2019, team = "TCU")
+#'   try(cfbd_metrics_ppa_teams(year = 2019, team = "TCU"))
 #' }
-#'
+
 cfbd_metrics_ppa_teams <- function(year = NULL,
                                    team = NULL,
                                    conference = NULL,
@@ -641,18 +658,19 @@ cfbd_metrics_ppa_teams <- function(year = NULL,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content, flatten and return result as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
@@ -661,6 +679,9 @@ cfbd_metrics_ppa_teams <- function(year = NULL,
       colnames(df) <- gsub("defense.", "def_", colnames(df))
       colnames(df) <- gsub("cumulative.", "cumulative_", colnames(df))
       colnames(df) <- gsub("Down", "_down", colnames(df))
+
+      df <- df %>%
+        make_cfbfastR_data("Team PPA data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no CFBData metrics PPA teams data available!"))
@@ -704,9 +725,9 @@ cfbd_metrics_ppa_teams <- function(year = NULL,
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_metrics_wp_pregame(year = 2019, week = 9, team = "Texas A&M")
+#'   try(cfbd_metrics_wp_pregame(year = 2019, week = 9, team = "Texas A&M"))
 #' }
-#'
+
 cfbd_metrics_wp_pregame <- function(year = NULL,
                                     week = NULL,
                                     team = NULL,
@@ -745,15 +766,6 @@ cfbd_metrics_wp_pregame <- function(year = NULL,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   cols <- c(
     "season", "season_type", "week", "game_id",
     "home_team", "away_team", "spread", "home_win_prob", "away_win_prob"
@@ -762,14 +774,26 @@ cfbd_metrics_wp_pregame <- function(year = NULL,
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON() %>%
         janitor::clean_names() %>%
         dplyr::mutate(away_win_prob = 1 - as.numeric(.data$home_win_prob)) %>%
-        dplyr::select(cols) %>%
-        as.data.frame()
+        dplyr::select(cols)
+
+      df <- df %>%
+        make_cfbfastR_data("pre-game WP data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no pre-game win probability data available!"))
@@ -784,7 +808,7 @@ cfbd_metrics_wp_pregame <- function(year = NULL,
 
 #' @title
 #' **Get win probability chart data from API**
-#' @param game_id (*Integer* required): Game ID filter for querying a single game\cr
+#' @param game_id (*Integer* required): Game ID filter for querying a single game
 #' Can be found using the [cfbd_game_info()] function
 #'
 #' @return [cfbd_metrics_wp()] - A data frame with 16 variables:
@@ -818,9 +842,9 @@ cfbd_metrics_wp_pregame <- function(year = NULL,
 #' @export
 #' @examples
 #' \donttest{
-#' cfbd_metrics_wp(game_id = 401012356)
+#'   try(cfbd_metrics_wp(game_id = 401012356))
 #' }
-#'
+
 cfbd_metrics_wp <- function(game_id) {
 
 
@@ -843,15 +867,6 @@ cfbd_metrics_wp <- function(game_id) {
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   cols <- c(
     "play_id", "play_text", "home_id", "home", "away_id", "away",
     "spread", "home_ball", "home_score", "away_score", "down",
@@ -861,6 +876,16 @@ cfbd_metrics_wp <- function(game_id) {
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
@@ -868,7 +893,9 @@ cfbd_metrics_wp <- function(game_id) {
         janitor::clean_names() %>%
         dplyr::mutate(away_win_prob = 1 - as.numeric(.data$home_win_prob)) %>%
         dplyr::select(cols)
-      as.data.frame()
+
+      df <- df %>%
+        make_cfbfastR_data("WP data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no CFBData metrics win probability data available!"))

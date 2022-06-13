@@ -8,7 +8,7 @@
 #' \item{`cfbd_play_stats_types()`:}{ Gets CFBD play stat types.}
 #' \item{`cfbd_play_types()`:}{ Gets CFBD play types.}
 #' }
-#'
+#' @details
 #' ### **Pull first 3 weeks of 2020 season using `cfbd_plays()`**
 #' ```r
 #'  year_vector <- 2020
@@ -18,7 +18,7 @@
 #'  year_split <- split(weekly_year_df, weekly_year_df$year)
 #'  for (i in 1:length(year_split)) {
 #'    i <- 1
-#'    future::plan("multisession")
+#'
 #'    progressr::with_progress({
 #'       year_split[[i]] <- year_split[[i]] %>%
 #'          dplyr::mutate(
@@ -62,11 +62,11 @@ NULL
 #' @param team Select team name (example: Texas, Texas A&M, Clemson)
 #' @param offense Select offense name (example: Texas, Texas A&M, Clemson)
 #' @param defense Select defense name (example: Texas, Texas A&M, Clemson)
-#' @param conference Select conference name (example: ACC, B1G, B12, SEC,\cr
+#' @param conference Select conference name (example: ACC, B1G, B12, SEC,
 #'  PAC, MAC, MWC, CUSA, Ind, SBC, AAC, Western, MVIAA, SWC, PCC, Big 6, etc.)
-#' @param offense_conference Select conference name (example: ACC, B1G, B12, SEC,\cr
+#' @param offense_conference Select conference name (example: ACC, B1G, B12, SEC,
 #'  PAC, MAC, MWC, CUSA, Ind, SBC, AAC, Western, MVIAA, SWC, PCC, Big 6, etc.)
-#' @param defense_conference Select conference name (example: ACC, B1G, B12, SEC,\cr
+#' @param defense_conference Select conference name (example: ACC, B1G, B12, SEC,
 #'  PAC, MAC, MWC, CUSA, Ind, SBC, AAC, Western, MVIAA, SWC, PCC, Big 6, etc.)
 #' @param play_type Select play type (example: see the [cfbd_play_type_df])
 #' @return [cfbd_plays()] - A data frame with 29 columns:
@@ -107,34 +107,7 @@ NULL
 #' @export
 #' @examples
 #' \dontrun{
-#'  year_vector <- 2020
-#'  week_vector <- 1:3
-#'  weekly_year_df <- expand.grid(year = year_vector, week = week_vector)
-#'  tictoc::tic()
-#'  year_split <- split(weekly_year_df, weekly_year_df$year)
-#'  for (i in 1:length(year_split)) {
-#'    i <- 1
-#'    future::plan("multisession")
-#'    progressr::with_progress({
-#'       year_split[[i]] <- year_split[[i]] %>%
-#'          dplyr::mutate(
-#'             pbp = purrr::map2(
-#'                 .x = year,
-#'                 .y = week,
-#'                 cfbd_plays,
-#'                 season_type = "both"
-#'             )
-#'          )
-#'    })
-#'  }
-#'
-#'  tictoc::toc()
-#'  year_split <- lapply(year_split, function(x) {
-#'      x %>% tidyr::unnest(pbp, names_repair = "minimal")
-#'  })
-#'
-#'  all_years <- dplyr::bind_rows(year_split)
-#'  glimpse(all_years)
+#'   try(cfbd_plays(year = 2021, week = 1))
 #' }
 cfbd_plays <- function(year = 2020,
                        season_type = "regular",
@@ -207,24 +180,28 @@ cfbd_plays <- function(year = 2020,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON(flatten = TRUE) %>%
-        dplyr::rename(play_id = .data$id) %>%
-        as.data.frame()
+        dplyr::rename(play_id = .data$id)
+
+
+      df <- df %>%
+        make_cfbfastR_data("Play-by-play data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
         message(glue::glue("{Sys.time()}: Invalid arguments or no plays data available!"))
@@ -318,7 +295,7 @@ cfbd_plays <- function(year = 2020,
 #' @export
 #' @examples
 #' \donttest{
-#'   cfbd_play_stats_player(game_id = 401110722)
+#'   try(cfbd_play_stats_player(game_id = 401110722))
 #' }
 cfbd_play_stats_player <- function(year = NULL,
                                    week = NULL,
@@ -378,18 +355,19 @@ cfbd_play_stats_player <- function(year = NULL,
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   clean_df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
@@ -552,7 +530,9 @@ cfbd_play_stats_player <- function(year = NULL,
         dplyr::summarise_all(coalesce_by_column) %>%
         dplyr::ungroup()
 
-      clean_df <- as.data.frame(clean_df)
+
+      clean_df <- clean_df %>%
+        make_cfbfastR_data("Play-level player data from CollegeFootballData.com",Sys.time())
     },
     error = function(e) {
       message(glue::glue("{Sys.time()}: Invalid arguments or no play-level player stats data available!"))
@@ -579,7 +559,7 @@ cfbd_play_stats_player <- function(year = NULL,
 #' @export
 #' @examples
 #' \donttest{
-#'   cfbd_play_stats_types()
+#'   try(cfbd_play_stats_types())
 #' }
 cfbd_play_stats_types <- function() {
   full_url <- "https://api.collegefootballdata.com/play/stat/types"
@@ -587,24 +567,28 @@ cfbd_play_stats_types <- function() {
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
-
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON() %>%
-        dplyr::rename(play_stat_type_id = .data$id) %>%
-        as.data.frame()
+        dplyr::rename(play_stat_type_id = .data$id)
+
+
+      df <- df %>%
+        make_cfbfastR_data("Play stats type data from CollegeFootballData.com",Sys.time())
 
     },
     error = function(e) {
@@ -632,31 +616,38 @@ cfbd_play_stats_types <- function() {
 #' @importFrom cli cli_abort
 #' @importFrom glue glue
 #' @export
+#' @examples
+#' \donttest{
+#'   try(cfbd_play_types())
+#' }
 cfbd_play_types <- function() {
   full_url <- "https://api.collegefootballdata.com/play/types"
 
   # Check for CFBD API key
   if (!has_cfbd_key()) stop("CollegeFootballData.com now requires an API key.", "\n       See ?register_cfbd for details.", call. = FALSE)
 
-  # Create the GET request and set response as res
-  res <- httr::RETRY(
-    "GET", full_url,
-    httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
-  )
-
-  # Check the result
-  check_status(res)
 
   df <- data.frame()
   tryCatch(
     expr = {
+
+      # Create the GET request and set response as res
+      res <- httr::RETRY(
+        "GET", full_url,
+        httr::add_headers(Authorization = paste("Bearer", cfbd_key()))
+      )
+
+      # Check the result
+      check_status(res)
+
       # Get the content and return it as data.frame
       df <- res %>%
         httr::content(as = "text", encoding = "UTF-8") %>%
         jsonlite::fromJSON() %>%
-        dplyr::rename(play_type_id = .data$id) %>%
-        as.data.frame()
+        dplyr::rename(play_type_id = .data$id)
 
+      df <- df %>%
+        make_cfbfastR_data("Play types data from CollegeFootballData.com",Sys.time())
 
     },
     error = function(e) {
